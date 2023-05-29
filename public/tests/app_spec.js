@@ -23,7 +23,21 @@ describe('LearnJS', function () {
         $(window).trigger('hashchange')
         expect(learnjs.showView).toHaveBeenCalledWith(window.location.hash)
     })
+    it('can flash an element while setting the text', function() {
+        const elem = $('<p>');
+        spyOn(elem, 'fadeOut').and.callThrough();
+        spyOn(elem, 'fadeIn');
+        learnjs.flashElement(elem, "new text");
+        expect(elem.text()).toEqual("new text");
+        expect(elem.fadeOut).toHaveBeenCalled();
+        expect(elem.fadeIn).toHaveBeenCalled();
+    })
+    it('can redirect to the main view after the last problem is answered', function() {
+        const flash = learnjs.buildCorrectFlash(2);
+        expect(flash.find('a').text()).toEqual("You're Finished!");
+        expect(flash.find('a').attr('href')).toEqual('');
 
+    })
     describe('problem view', function () {
         let view;
         beforeEach(function () {
@@ -48,12 +62,25 @@ describe('LearnJS', function () {
                 resultFlash = view.find('.result');
             });
 
-            it('can check a correct answer by hitting a button', function () {
-                view.find('.answer').val('true');
-                view.find('.check-btn').click();
-                const correctFlash = learnjs.template('correct-flash');
-                expect(learnjs.flashElement).toHaveBeenCalledWith(resultFlash, correctFlash);
+            describe('when the answer is correct', function () {
+                beforeEach(function() {
+                    view.find('.answer').val('true');
+                    view.find('.check-btn').click();
+                });
+
+                it('flashes the result', function() {
+                  const flashArgs = learnjs.flashElement.calls.argsFor(0);
+                  expect(flashArgs[0]).toEqual(resultFlash);
+                  expect(flashArgs[1].find('span').text()).toEqual('Correct!');
+                })
+
+                it('shows a link to the next problem', function() {
+                    const link = learnjs.flashElement.calls.argsFor(0)[1].find('a');
+                    expect(link.text()).toEqual('Next Problem');
+                    expect(link.attr('href')).toEqual('#problem-2');
+                })
             })
+
             it('reject an incorrect answer', function () {
                 view.find('.answer').val('false');
                 view.find('.check-btn').click();
