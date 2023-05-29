@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/../brapps-code/brapps-code.iml" filepath="$PROJECT_DIR$/../brapps-code/brapps-code.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/learnjs.iml" filepath="$PROJECT_DIR$/.idea/learnjs.iml" />
     </modules>
   </component>
