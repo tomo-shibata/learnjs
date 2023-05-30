@@ -1,16 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset='utf-8'>
-    <meta name="google-signin-client_id" content="715099672711-sshlsu9dm3otvotp957lptk10cg8qobe.apps.googleusercontent.com">
+    <meta charset="utf-8">
     <title>Learn JS!</title>
-    <link href='//fonts.googleapis.com/css?family=Raleway:400,300,600' rel='stylesheet' type='text/css'>
-    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/normalize/3.0.2/normalize.min.css'>
-    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css'>
-    <script src='https://code.jquery.com/jquery-2.1.4.min.js'></script>
-    <script src="https://apis.google.com/js/platform.js" async defer></script>
-    <script src='/vendor.js'></script>
-    <script src='/app.js'></script>
+    <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/3.0.2/normalize.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css">
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="/vendor.js"></script>
+    <script src="/app.js"></script>
     <style type="text/css" media="all">
         body { margin-top: 60px; }
         .templates { display: none; }
@@ -25,10 +23,6 @@
             background: #666;
         }
         .nav-container a { color: white; }
-        .navbar-padding {
-            padding-top: 7px;
-            display: inline-block;
-        }
         .fixed-top {
             position: fixed;
             top: 0px;
@@ -43,10 +37,21 @@
         }
         .hover-links a { text-decoration: none; }
         .hover-links a:hover { text-decoration: underline; }
+        .navbar-padding {
+            padding-top: 7px;
+            display: inline-block;
+        }
+        .navbar-padding-lg {
+            padding-top: 12px;
+            display: inline-block;
+        }
         .text-lg {
             font-size: 32px;
         }
     </style>
+    <meta name="google-signin-client_id"
+          content="715099672711-sshlsu9dm3otvotp957lptk10cg8qobe.apps.googleusercontent.com">
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
 </head>
 <body>
 <div class="markup">
@@ -61,21 +66,26 @@
             </span>
         </div>
     </div>
-    <div class='view-container container'>
-
+    <div class="view-container container">
     </div>
-
     <div class="templates">
+        <div class="profile-link navbar-padding-lg">
+            <a href="#profile"></a>
+        </div>
         <div class="landing-view">
             <div class="row">
                 <div class="one-half column">
-                    <h3>Learn Javascript, one puzzle at a time.</h3>
+                    <h3>Learn JavaScript, one puzzle at a time.</h3>
                     <a href="#problem-1" class="button button-primary">Start Now!</a>
                 </div>
                 <div class="one-half column">
                     <img src="/images/HeroImage.jpg"/>
                 </div>
             </div>
+        </div>
+        <div class="profile-view">
+            <h3>Your Profile</h3>
+            <div class="email"></div>
         </div>
         <div class="problem-view">
             <h3 class="title"></h3>
@@ -89,18 +99,11 @@
                 </div>
             </form>
         </div>
-        <div class="correct-flash">
-            <span>Correct!</span> <a>Next Problem</a>
-        </div>
         <li class="skip-btn">
            <a>Skip This Problem</a>
         </li>
-        <div class="profile-view">
-            <h3>Your Profile</h3>
-            <div class="email"></div>
-        </div>
-        <div class="profile-link navbar-padding-lg">
-            <a href="#profile"></a>
+        <div class="correct-flash">
+            <span>Correct!</span> <a>Next Problem</a>
         </div>
     </div>
 </div>

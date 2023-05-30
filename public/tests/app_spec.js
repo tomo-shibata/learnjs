@@ -73,11 +73,15 @@ describe('LearnJS', function () {
         });
     });
 
-
     describe('profile view', function() {
         var view;
         beforeEach(function() {
             view = learnjs.profileView();
+        });
+
+        it('shows no email when the user is not logged in yet', function() {
+            const email = view.find('.email');
+            expect(email.text()).toEqual("");
         });
 
         it('shows the users email address when they log in', function() {
@@ -86,19 +90,45 @@ describe('LearnJS', function () {
             });
             expect(view.find('.email').text()).toEqual("foo@bar.com");
         });
-
-        it('shows no email when the user is not logged in yet', function() {
-            expect(view.find('.email').text()).toEqual("");
-        });
     });
 
+    describe('googleSignIn callback', function() {
+        let user, profile;
 
-    // describe('googleSignIn callback', function() {
-    //
-    //     it('sets the AWS region', function() {
-    //         expect(AWS.config.region).toEqual('us-east-1');
-    //     });
-    // })
+        beforeEach(function () {
+            profile = jasmine.createSpyObj('profile', ['getEmail']);
+            const refreshPromise = new $.Deferred().resolve("COGNITO_ID").promise();
+            spyOn(learnjs, 'awsRefresh').and.returnValue(refreshPromise);
+            spyOn(AWS, 'CognitoIdentityCredentials');
+
+            user = jasmine.createSpyObj('user', ['getAuthResponse', 'getBasicProfile']);
+            user.getAuthResponse.and.returnValue({id_token: 'GOOGLE_ID'});
+            user.getBasicProfile.and.returnValue(profile);
+            profile.getEmail.and.returnValue('foo@bar.com');
+            googleSignIn(user);
+        });
+
+        it('sets the AWS region', function() {
+            expect(AWS.config.region).toEqual('us-east-1');
+        });
+
+        it('sets the identity pool ID and Google ID token', function() {
+            expect(AWS.CognitoIdentityCredentials).toHaveBeenCalledWith({
+                IdentityPoolId: learnjs.poolId,
+                Logins: {
+                    'accounts.google.com': 'GOOGLE_ID'
+                }
+            });
+        });
+
+        it('fetches the AWS credentials and resolved the deferred', function(done) {
+            learnjs.identity.done(function(identity) {
+                expect(identity.email).toEqual('foo@bar.com');
+                expect(identity.id).toEqual('COGNITO_ID');
+                done();
+            });
+        });
+    })
 
     describe('problem view', function () {
         let view;
