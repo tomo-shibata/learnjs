@@ -38,6 +38,68 @@ describe('LearnJS', function () {
         expect(flash.find('a').attr('href')).toEqual('');
 
     })
+
+    it('can trigger events on the view', function() {
+        callback = jasmine.createSpy('callback');
+        const div = $('<div>').bind('fooEvent', callback);
+        $('.view-container').append(div);
+        learnjs.triggerEvent('fooEvent', ['bar']);
+        expect(callback).toHaveBeenCalled();
+        expect(callback.calls.argsFor(0)[1]).toEqual('bar');
+    });
+
+    describe('awsRefresh', function () {
+        let callbackArg, fakeCreds;
+
+        beforeEach(function() {
+            fakeCreds = jasmine.createSpyObj('creds', ['refresh']);
+            fakeCreds.identityId = 'COGNITO_ID';
+            AWS.config.credentials = fakeCreds;
+            fakeCreds.refresh.and.callFake(function(cb) { cb(callbackArg); });
+        });
+
+        it('returns a promise that resolves on success', function (done) {
+            learnjs.awsRefresh().then(function (id) {
+                expect(fakeCreds.identityId).toEqual('COGNITO_ID');
+            }).then(done, fail);
+        });
+
+        it('reject the promise on failure', function (done) {
+            callbackArg = 'error';
+            learnjs.awsRefresh().fail(function (err) {
+                expect(err).toEqual('error');
+                done();
+            });
+        });
+    });
+
+
+    describe('profile view', function() {
+        var view;
+        beforeEach(function() {
+            view = learnjs.profileView();
+        });
+
+        it('shows the users email address when they log in', function() {
+            learnjs.identity.resolve({
+                email: 'foo@bar.com'
+            });
+            expect(view.find('.email').text()).toEqual("foo@bar.com");
+        });
+
+        it('shows no email when the user is not logged in yet', function() {
+            expect(view.find('.email').text()).toEqual("");
+        });
+    });
+
+
+    // describe('googleSignIn callback', function() {
+    //
+    //     it('sets the AWS region', function() {
+    //         expect(AWS.config.region).toEqual('us-east-1');
+    //     });
+    // })
+
     describe('problem view', function () {
         let view;
         beforeEach(function () {
