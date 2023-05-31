@@ -49,9 +49,13 @@
             font-size: 32px;
         }
     </style>
-    <meta name="google-signin-client_id"
-          content="715099672711-sshlsu9dm3otvotp957lptk10cg8qobe.apps.googleusercontent.com">
-    <script src="https://apis.google.com/js/platform.js" async defer></script>
+<!--    <meta name="google-signin-client_id"-->
+<!--          content="715099672711-sshlsu9dm3otvotp957lptk10cg8qobe.apps.googleusercontent.com">-->
+<!--    <script src="https://apis.google.com/js/platform.js" async defer></script>-->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <meta id="g_id_onload"
+         data-client_id="715099672711-sshlsu9dm3otvotp957lptk10cg8qobe.apps.googleusercontent.com"
+         data-callback="googleSignIn">
 </head>
 <body>
 <div class="markup">
@@ -62,7 +66,8 @@
         </ul>
         <div class="four columns signin-bar">
             <span class="navbar-padding u-pull-right">
-                <span class="g-signin2" data-onsuccess="googleSignIn"></span>
+<!--                <span class="g-signin2" data-onsuccess="googleSignIn"></span>-->
+                <span class="g_id_signin" data-type="standard"></span>
             </span>
         </div>
     </div>

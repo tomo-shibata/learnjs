@@ -140,14 +140,38 @@ learnjs.awsRefresh = function() {
     return deferred.promise();
 }
 
+learnjs.parseJWT = function (googleUser) {
+    const credential = googleUser.credential;
+    const encodedClaims = credential.split('.')[1];
+    const tokenData = JSON.parse(
+        decodeURIComponent(
+            escape(
+                atob(encodedClaims
+                    .replace(/-/g, '+')
+                    .replace(/_/g, '/')))
+        )
+    );
+
+    return new learnjs.profile ({
+       id: tokenData.sub,
+       email: tokenData.email
+    });
+};
+
+learnjs.profile = function (id,email) {
+    this.id = id;
+    this.email = email;
+}
+
 function googleSignIn(googleUser) {
-    var id_token = googleUser.getAuthResponse().id_token;
+    const tokenData = learnjs.parseJWT(googleUser);
+
     AWS.config.update({
         region: 'us-east-1',
         credentials: new AWS.CognitoIdentityCredentials({
             IdentityPoolId: learnjs.poolId,
             Logins: {
-                'accounts.google.com': id_token
+                'accounts.google.com': tokenData.id
             }
         })
     })
@@ -156,15 +180,16 @@ function googleSignIn(googleUser) {
             prompt: 'login'
         }).then(function(userUpdate) {
             var creds = AWS.config.credentials;
-            var newToken = userUpdate.getAuthResponse().id_token;
-            creds.params.Logins['accounts.google.com'] = newToken;
+            const newTokenData = learnjs.parseJWT(userUpdate);
+            creds.params.Logins['accounts.google.com'] = newTokenData.id;
             return learnjs.awsRefresh();
         });
     }
     learnjs.awsRefresh().then(function(id) {
+        const email = learnjs.parseJWT(googleUser).email;
         learnjs.identity.resolve({
             id: id,
-            email: googleUser.getBasicProfile().getEmail(),
+            email: email,
             refresh: refresh
         });
     });
