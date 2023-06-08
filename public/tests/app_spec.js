@@ -74,7 +74,7 @@ describe('LearnJS', function () {
     });
 
     describe('profile view', function() {
-        var view;
+        let view;
         beforeEach(function() {
             view = learnjs.profileView();
         });
@@ -113,8 +113,8 @@ describe('LearnJS', function () {
 
         it('fetches the AWS credentials and resolved the deferred', function(done) {
             learnjs.identity.done(function(identity) {
-                expect(identity.email).toEqual('foo@bar.com');
                 expect(identity.id).toEqual('COGNITO_ID');
+                expect(identity.email).toEqual('foo@bar.com');
                 done();
             });
         });
