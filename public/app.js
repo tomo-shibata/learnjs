@@ -17,6 +17,11 @@ learnjs.problems = [
     }
 ];
 
+learnjs.profile = function (id,email) {
+    this.id_token = id;
+    this.email = email;
+}
+
 learnjs.triggerEvent = function(name, args) {
     $('.view-container>*').trigger(name, args);
 }
@@ -61,7 +66,7 @@ learnjs.problemView = function(data) {
     const view = learnjs.template('problem-view');
     const problemData = learnjs.problems[problemNumber - 1];
     const resultFlash = view.find('.result');
-    let answer;
+    const answer  = view.find('.answer');
 
     learnjs.fetchAnswer(problemNumber).then(function (data) {
         answer.val(data.Item.answer);
@@ -73,7 +78,6 @@ learnjs.problemView = function(data) {
     }
 
     function checkAnswerClick() {
-        answer = view.find('.answer').val();
         if (checkAnswer()) {
             const flashContent = learnjs.buildCorrectFlash(problemNumber);
             learnjs.flashElement(resultFlash, flashContent);
@@ -134,38 +138,6 @@ learnjs.appOnReady = function() {
     learnjs.identity.done(learnjs.addProfileLink);
 }
 
-learnjs.awsRefresh = function() {
-    const deferred = new $.Deferred();
-    AWS.config.credentials.refresh(function(err) {
-        if (err) {
-            deferred.reject(err);
-        } else {
-            deferred.resolve(AWS.config.credentials.identityId);
-        }
-    });
-    return deferred.promise();
-}
-
-learnjs.parseJWT = function (googleUser) {
-    const credential = googleUser.credential;
-    const encodedClaims = credential.split('.')[1];
-    const payload = JSON.parse(
-        decodeURIComponent(
-            escape(
-                atob(encodedClaims
-                    .replace(/-/g, '+')
-                    .replace(/_/g, '/')))
-        )
-    );
-return payload;
-    //return new learnjs.profile(payload.sub, payload.email);
-};
-
-learnjs.profile = function (id,email) {
-    this.id = id;
-    this.email = email;
-}
-
 learnjs.sendDbRequest = function (req, retry) {
     const promise = new $.Deferred;
     req.on('error', function (error) {
@@ -189,6 +161,7 @@ learnjs.sendDbRequest = function (req, retry) {
 }
 
 learnjs.fetchAnswer = function (problemId) {
+    console.log('## Called fetchAnswer')
     return learnjs.identity.then(function (identity) {
         const db = new AWS.DynamoDB.DocumentClient();
         const item = {
@@ -198,13 +171,16 @@ learnjs.fetchAnswer = function (problemId) {
                 problemId: problemId
             }
         };
+        console.log('### fetch answer..')
         return learnjs.sendDbRequest(db.get(item), function () {
+            console.log('#### retry.')
             return learnjs.fetchAnswer(problemId);
         });
     });
 }
 
 learnjs.saveAnswer = function (problemId, answer) {
+    console.log("## Called saveAnswer.")
     // identityが解決されるまで待つ
     return learnjs.identity.then(function (identity) {
         const db = new AWS.DynamoDB.DocumentClient();
@@ -216,32 +192,62 @@ learnjs.saveAnswer = function (problemId, answer) {
                 answer: answer
             }
         };
+        console.log("### Save answer..")
         return learnjs.sendDbRequest(db.put(item), function () {
+            console.log("#### retry.")
             return learnjs.saveAnswer(problemId, answer);
         });
     });
 }
 
+learnjs.awsRefresh = function() {
+    const deferred = new $.Deferred();
+    AWS.config.credentials.refresh(function(err) {
+        if (err) {
+            console.log("### Aws credentials refresh is error." + err)
+            deferred.reject(err);
+        } else {
+            deferred.resolve(AWS.config.credentials.identityId);
+        }
+    });
+    return deferred.promise();
+}
+
+learnjs.parseJWT = function (googleUser) {
+    const credential = googleUser.credential;
+    const encodedClaims = credential.split('.')[1];
+    const payload = JSON.parse(
+        decodeURIComponent(
+            escape(
+                atob(encodedClaims
+                    .replace(/-/g, '+')
+                    .replace(/_/g, '/')))
+        )
+    );
+    return new learnjs.profile(payload.sub, payload.email);
+};
 
 function googleSignIn(googleUser) {
-    const id_token = learnjs.parseJWT(googleUser);
+    console.log("### google called to me!")
+    const profile = learnjs.parseJWT(googleUser);
 
     AWS.config.update({
         region: 'us-east-1',
         credentials: new AWS.CognitoIdentityCredentials({
             IdentityPoolId: learnjs.poolId,
             Logins: {
-                'accounts.google.com': id_token
+                'accounts.google.com': googleUser.credential
             }
         })
     })
+    // when token is expired, it called for refresh token.
     function refresh() {
         return gapi.auth2.getAuthInstance().signIn({
             prompt: 'login'
         }).then(function(userUpdate) {
             const creds = AWS.config.credentials;
             const newTokenData = learnjs.parseJWT(userUpdate);
-            creds.params.Logins['accounts.google.com'] = newTokenData.id;
+            creds.params.Logins['accounts.google.com'] = newTokenData.credential;
             return learnjs.awsRefresh();
         });
     }
@@ -254,3 +260,4 @@ function googleSignIn(googleUser) {
         });
     });
 }
+
