@@ -1,0 +1,10 @@
+{
+    "Bucket": "learnjs.tomoya1111.com", 
+    "BucketLoggingStatus": {
+        "LoggingEnabled": {
+            "TargetBucket": "learnjs-logging.tomoya1111.com", 
+            "TargetGrants": [], 
+            "TargetPrefix": ""
+        }
+    } 
+}

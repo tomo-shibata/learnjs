@@ -62,35 +62,47 @@ learnjs.buildCorrectFlash = function (problemNum) {
 }
 
 learnjs.problemView = function(data) {
-    const problemNumber = parseInt(data, 10);
+    const problemId = parseInt(data, 10);
     const view = learnjs.template('problem-view');
-    const problemData = learnjs.problems[problemNumber - 1];
+    const problemData = learnjs.problems[problemId - 1];
     const resultFlash = view.find('.result');
     const answer  = view.find('.answer');
 
-    learnjs.fetchAnswer(problemNumber).then(function (data) {
+    learnjs.fetchAnswer(problemId).then(function (data) {
         answer.val(data.Item.answer);
     })
 
     function checkAnswer() {
-        const test = problemData.code.replace('__', answer) + '; problem();';
-        return eval(test);
+        const def = $.Deferred();
+        const test = problemData.code.replace('__', answer.val()) + '; problem();';
+
+        const worker = new Worker('workers.js');
+        // このonmessageは、workerからメッセージ受信したときの動き.workers.jsのonmessageを上書きしてるわけじゃない
+        worker.onmessage = function (e) {
+            if(e.data) {
+                def.resolve(e.data);
+            } else {
+                def.reject();
+            }
+        };
+        worker.postMessage(test); // worker.onmessageへ.postMessageの結果、上のonmessageへ帰ってくる
+        return def;
     }
 
     function checkAnswerClick() {
-        if (checkAnswer()) {
-            const flashContent = learnjs.buildCorrectFlash(problemNumber);
+        checkAnswer().done(function () {
+            const flashContent = learnjs.buildCorrectFlash(problemId);
             learnjs.flashElement(resultFlash, flashContent);
-            learnjs.saveAnswer(problemNumber, answer);
-        } else {
+            learnjs.saveAnswer(problemId, answer);
+        }).fail(function () {
             learnjs.flashElement(resultFlash, 'Incorrect!');
-        }
+        });
         return false;
     }
 
-    if (problemNumber < learnjs.problems.length) {
+    if (problemId < learnjs.problems.length) {
         const buttonItem = learnjs.template('skip-btn');
-        buttonItem.find('a').attr('href', '#problem-' + (problemNumber + 1));
+        buttonItem.find('a').attr('href', '#problem-' + (problemId + 1));
         $('.nav-list').append(buttonItem);
         view.bind('removingView', function() {
             buttonItem.remove();
@@ -98,7 +110,7 @@ learnjs.problemView = function(data) {
     }
 
     view.find('.check-btn').click(checkAnswerClick);
-    view.find('.title').text('Problem #' + problemNumber);
+    view.find('.title').text('Problem #' + problemId);
     learnjs.applyObject(problemData, view);
     return view;
 }
@@ -176,6 +188,32 @@ learnjs.fetchAnswer = function (problemId) {
             console.log('#### retry.')
             return learnjs.fetchAnswer(problemId);
         });
+    });
+}
+learnjs.popularAnswers = function(problemId) {
+    return learnjs.identity.then(function() {
+        var lambda = new AWS.Lambda();
+        var params = {
+            FunctionName: 'learnjs_popularAnswers',
+            Payload: JSON.stringify({problemNumber: problemId})
+        };
+        return learnjs.sendAwsRequest(lambda.invoke(params), function() {
+            return learnjs.popularAnswers(problemId);
+        });
+    });
+}
+learnjs.countAnswers = function (problemId) {
+    return learnjs.identity.then(function (identity) {
+        const db = new AWS.DynamoDB.DocumentClient();
+        const params = {
+            TableName: 'learnjs',
+            Select: 'COUNT',
+            FilterExpression: 'problemId = :problemId',
+            ExpressionAttributeValues: {'problemId': problemId}
+        };
+        return learnjs.sendDbRequest(db.scan(params), function () {
+            return learnjs.countAnswers(problemId);
+        })
     });
 }
 

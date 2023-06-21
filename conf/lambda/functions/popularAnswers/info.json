@@ -1,0 +1,23 @@
+{
+    "LastUpdateStatus": "InProgress", 
+    "FunctionName": "popularAnswers", 
+    "LastModified": "2023-06-19T02:41:51.000+0000", 
+    "RevisionId": "e0fead0c-e520-492d-a783-37898e8efab6", 
+    "LastUpdateStatusReason": "The function is being created.", 
+    "MemorySize": 512, 
+    "State": "Active", 
+    "Version": "$LATEST", 
+    "Role": "arn:aws:iam::236109874431:role/learnjs_lambda_exec", 
+    "Timeout": 5, 
+    "Handler": "index.popularAnswers", 
+    "Runtime": "nodejs18.x", 
+    "TracingConfig": {
+        "Mode": "PassThrough"
+    }, 
+    "CodeSha256": "T0+i+2M/Lbf/u/l0ipAFM8KkzAKQlEoWWX0txsTfvkQ=", 
+    "Description": "", 
+    "LastUpdateStatusReasonCode": "Creating", 
+    "CodeSize": 785383, 
+    "FunctionArn": "arn:aws:lambda:us-east-1:236109874431:function:popularAnswers", 
+    "PackageType": "Zip"
+}

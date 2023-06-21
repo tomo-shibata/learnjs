@@ -1,0 +1,23 @@
+{
+    "LastUpdateStatus": "InProgress", 
+    "FunctionName": "echo", 
+    "LastModified": "2023-06-19T02:41:48.000+0000", 
+    "RevisionId": "49e1242c-3fc4-401d-8405-e363858ae4d6", 
+    "LastUpdateStatusReason": "The function is being created.", 
+    "MemorySize": 128, 
+    "State": "Active", 
+    "Version": "$LATEST", 
+    "Role": "arn:aws:iam::236109874431:role/learnjs_lambda_exec", 
+    "Timeout": 5, 
+    "Handler": "index.echo", 
+    "Runtime": "nodejs18.x", 
+    "TracingConfig": {
+        "Mode": "PassThrough"
+    }, 
+    "CodeSha256": "T0+i+2M/Lbf/u/l0ipAFM8KkzAKQlEoWWX0txsTfvkQ=", 
+    "Description": "", 
+    "LastUpdateStatusReasonCode": "Creating", 
+    "CodeSize": 785383, 
+    "FunctionArn": "arn:aws:lambda:us-east-1:236109874431:function:echo", 
+    "PackageType": "Zip"
+}
